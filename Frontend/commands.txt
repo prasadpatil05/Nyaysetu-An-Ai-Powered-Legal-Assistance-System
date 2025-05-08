@@ -1,0 +1,10 @@
+Commands
+for frontend yarn dev 
+for backend  venv\Scripts\activate
+$env:FLASK_DEBUG = "1"; $env:FLASK_APP = "main.py"; flask run --port 5000
+
+for blockchain storage 
+inside nyaysathi folder 
+npx hardhat node
+
+then in new terminal  npx hardhat run scripts/deploy.js --network localhost

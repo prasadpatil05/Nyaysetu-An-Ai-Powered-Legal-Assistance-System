@@ -1,0 +1,67 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow users to read and write their own profile
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Allow lawyers to manage their profiles
+    match /lawyers/{lawyerId} {
+      // Allow anyone to read lawyer profiles
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null && (request.auth.uid + request.auth.token.email == lawyerId || request.auth.uid == lawyerId);
+      allow delete: if request.auth != null && (request.auth.uid + request.auth.token.email == lawyerId || request.auth.uid == lawyerId);
+    }
+
+    // Allow users to create and read their own queries
+    match /queries/{queryId} {
+      allow create: if request.auth != null;
+      allow read: if request.auth != null;
+    }
+
+    // Connection requests rules
+    match /connectionRequests/{requestId} {
+      // Allow users to create connection requests
+      allow create: if request.auth != null;
+
+      // Allow anyone to read connection requests for debugging
+      allow read: if true;
+
+      // Allow anyone to update connection requests for now (for debugging)
+      allow update: if true;
+
+      // Allow deletion for debugging
+      allow delete: if true;
+    }
+
+    // Chat rooms rules
+    match /chatRooms/{chatRoomId} {
+      // Allow anyone to create and read chat rooms for now (for debugging)
+      allow create: if true;
+      allow read: if true;
+
+      // Allow participants to update their chat rooms
+      allow update: if request.auth != null &&
+                     (request.auth.uid == resource.data.userId ||
+                      request.auth.uid == resource.data.lawyerId);
+
+      // Allow deletion for debugging
+      allow delete: if true;
+    }
+
+    // Chats rules (for backward compatibility)
+    match /chats/{chatId} {
+      allow read, write: if request.auth != null &&
+                          (request.auth.uid == resource.data.user ||
+                           request.auth.uid == chatId);
+    }
+
+    // Default deny all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
